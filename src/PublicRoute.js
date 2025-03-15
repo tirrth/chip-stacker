@@ -16,7 +16,7 @@ const PublicRoute = ({ children }) => {
                     background: "#f0f2f5",
                 }}
             >
-                <img src="/logo.svg" alt="Logo" style={{ width: "100px" }} />
+                <img src="/logo.png" alt="Logo" style={{ width: "100px" }} />
             </div>
         );
     // If the user exists and has a displayName, redirect to Home.

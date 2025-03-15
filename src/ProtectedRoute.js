@@ -16,7 +16,7 @@ const ProtectedRoute = ({ children }) => {
                     background: "#f0f2f5",
                 }}
             >
-                <img src="/logo.svg" alt="Logo" style={{ width: "100px" }} />
+                <img src="/logo.png" alt="Logo" style={{ width: "100px" }} />
             </div>
         );
     if (!user || !user.displayName) {
