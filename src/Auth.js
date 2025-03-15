@@ -198,152 +198,156 @@ const Auth = () => {
     };
 
     return (
-        <div
-            style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "100vh", // fill viewport height
-                padding: "0 1rem", // horizontal padding so card isn't flush
-                boxSizing: "border-box",
-                background: "#f0f2f5",
-                overflow: "hidden", // disable scrolling
-            }}
-        >
-            <div style={{
-                maxWidth: "400px",
-                width: "100%"
-            }}>
-                {/* Logo at the top, centered, 10px inside the card */}
-                <div style={{ textAlign: "center", marginTop: "10px" }}>
-                    <img
-                        src="/logo.png" // Replace with your logo path
-                        alt="Logo"
-                        style={{ maxWidth: "100px", marginBottom: '5px' }}
-                    />
-                </div>
-                <div
-                    style={{
-                        padding: "0rem 1.5rem",
-                        background: "#fff",
-                        border: "1px solid #eaeaea",
-                        borderRadius: "6px",
-                    }}
-                >
-                    <Title level={3} style={{ textAlign: "center" }}>
-                        Sign In / Sign Up
-                    </Title>
+        <>
+            <div id="recaptcha-container"></div>
 
-                    {step === "phone" && (
-                        <Form layout="vertical">
-                            <Form.Item label="Mobile Number">
-                                <Input
-                                    size="large"
-                                    addonBefore="+1"
-                                    placeholder="Enter your mobile number"
-                                    value={phone}
-                                    onChange={handlePhoneChange}
-                                />
-                            </Form.Item>
-                            <Form.Item>
+            <div
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    height: "100vh", // fill viewport height
+                    padding: "0 1rem", // horizontal padding so card isn't flush
+                    boxSizing: "border-box",
+                    background: "#f0f2f5",
+                    overflow: "hidden", // disable scrolling
+                }}
+            >
+                <div style={{
+                    maxWidth: "400px",
+                    width: "100%"
+                }}>
+                    {/* Logo at the top, centered, 10px inside the card */}
+                    <div style={{ textAlign: "center", marginTop: "10px" }}>
+                        <img
+                            src="/logo.png" // Replace with your logo path
+                            alt="Logo"
+                            style={{ maxWidth: "100px", marginBottom: '5px' }}
+                        />
+                    </div>
+                    <div
+                        style={{
+                            padding: "0rem 1.5rem",
+                            background: "#fff",
+                            border: "1px solid #eaeaea",
+                            borderRadius: "6px",
+                        }}
+                    >
+                        <Title level={3} style={{ textAlign: "center" }}>
+                            Sign In / Sign Up
+                        </Title>
+
+                        {step === "phone" && (
+                            <Form layout="vertical">
+                                <Form.Item label="Mobile Number">
+                                    <Input
+                                        size="large"
+                                        addonBefore="+1"
+                                        placeholder="Enter your mobile number"
+                                        value={phone}
+                                        onChange={handlePhoneChange}
+                                    />
+                                </Form.Item>
+                                <Form.Item>
+                                    <Button
+                                        size="large"
+                                        type="primary"
+                                        block
+                                        onClick={handleSendOtp}
+                                        loading={phoneLoading}
+                                    >
+                                        Send OTP
+                                    </Button>
+                                </Form.Item>
+                            </Form>
+                        )}
+
+                        {step === "otp" && (
+                            <div>
+                                <Text strong>Enter OTP</Text>
+                                <Space
+                                    style={{
+                                        marginTop: "1rem",
+                                        marginBottom: "1rem",
+                                        justifyContent: "center",
+                                        display: "flex",
+                                    }}
+                                >
+                                    {otp.map((digit, index) => (
+                                        <Input
+                                            key={index}
+                                            size="large"
+                                            ref={(el) => (otpInputRefs.current[index] = el)}
+                                            maxLength={1}
+                                            type="tel"
+                                            inputMode="numeric"
+                                            autoFocus={index === 0}
+                                            style={{
+                                                width: "3rem",
+                                                height: "3.5rem",
+                                                fontSize: "1.5rem",
+                                                textAlign: "center",
+                                            }}
+                                            value={digit}
+                                            onChange={(e) => handleOtpChange(e, index)}
+                                            onKeyDown={(e) => handleOtpKeyDown(e, index)}
+                                            onPaste={handleOtpPaste}  // Attach the onPaste handler here
+                                        />
+                                    ))}
+                                </Space>
                                 <Button
                                     size="large"
                                     type="primary"
                                     block
-                                    onClick={handleSendOtp}
-                                    loading={phoneLoading}
+                                    onClick={() => handleVerifyOtp()}
+                                    loading={otpLoading}
                                 >
-                                    Send OTP
+                                    Verify OTP
                                 </Button>
-                            </Form.Item>
-                        </Form>
-                    )}
+                            </div>
+                        )}
 
-                    {step === "otp" && (
-                        <div>
-                            <Text strong>Enter OTP</Text>
-                            <Space
+                        {step === "name" && (
+                            <Form layout="vertical">
+                                <Form.Item label="Full Name">
+                                    <Input
+                                        size="large"
+                                        placeholder="Enter your full name"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                    />
+                                </Form.Item>
+                                <Form.Item>
+                                    <Button
+                                        size="large"
+                                        type="primary"
+                                        block
+                                        onClick={handleSubmitName}
+                                        loading={nameLoading}
+                                    >
+                                        Submit Name
+                                    </Button>
+                                </Form.Item>
+                            </Form>
+                        )}
+
+                        {message && (
+                            <Text
                                 style={{
+                                    display: "block",
+                                    textAlign: "center",
                                     marginTop: "1rem",
-                                    marginBottom: "1rem",
-                                    justifyContent: "center",
-                                    display: "flex",
+                                    marginBottom: '1rem',
+                                    color: messageType === "error" ? "red" : "green",
                                 }}
                             >
-                                {otp.map((digit, index) => (
-                                    <Input
-                                        key={index}
-                                        size="large"
-                                        ref={(el) => (otpInputRefs.current[index] = el)}
-                                        maxLength={1}
-                                        type="tel"
-                                        inputMode="numeric"
-                                        autoFocus={index === 0}
-                                        style={{
-                                            width: "3rem",
-                                            height: "3.5rem",
-                                            fontSize: "1.5rem",
-                                            textAlign: "center",
-                                        }}
-                                        value={digit}
-                                        onChange={(e) => handleOtpChange(e, index)}
-                                        onKeyDown={(e) => handleOtpKeyDown(e, index)}
-                                        onPaste={handleOtpPaste}  // Attach the onPaste handler here
-                                    />
-                                ))}
-                            </Space>
-                            <Button
-                                size="large"
-                                type="primary"
-                                block
-                                onClick={() => handleVerifyOtp()}
-                                loading={otpLoading}
-                            >
-                                Verify OTP
-                            </Button>
-                        </div>
-                    )}
-
-                    {step === "name" && (
-                        <Form layout="vertical">
-                            <Form.Item label="Full Name">
-                                <Input
-                                    size="large"
-                                    placeholder="Enter your full name"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
-                                />
-                            </Form.Item>
-                            <Form.Item>
-                                <Button
-                                    size="large"
-                                    type="primary"
-                                    block
-                                    onClick={handleSubmitName}
-                                    loading={nameLoading}
-                                >
-                                    Submit Name
-                                </Button>
-                            </Form.Item>
-                        </Form>
-                    )}
-
-                    {message && (
-                        <Text
-                            style={{
-                                display: "block",
-                                textAlign: "center",
-                                marginTop: "1rem",
-                                marginBottom: '1rem',
-                                color: messageType === "error" ? "red" : "green",
-                            }}
-                        >
-                            {message}
-                        </Text>
-                    )}
+                                {message}
+                            </Text>
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 
