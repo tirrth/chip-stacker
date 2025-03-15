@@ -12,6 +12,22 @@ import { Form, Input, Button, Typography, Space } from "antd";
 const { Title, Text } = Typography;
 const OTP_LENGTH = 6;
 
+// Helper function to format a string of digits as (123) 456-7890
+const formatPhoneNumber = (digits) => {
+    if (!digits) return "";
+    if (digits.length <= 3) return "(" + digits;
+    if (digits.length <= 6)
+        return "(" + digits.slice(0, 3) + ") " + digits.slice(3);
+    return (
+        "(" +
+        digits.slice(0, 3) +
+        ") " +
+        digits.slice(3, 6) +
+        "-" +
+        digits.slice(6, 10)
+    );
+};
+
 const Auth = () => {
     const navigate = useNavigate();
 
@@ -31,6 +47,13 @@ const Auth = () => {
 
     // Refs for OTP input fields
     const otpInputRefs = useRef([]);
+
+    // When step changes to "otp", focus the first OTP input
+    useEffect(() => {
+        if (step === "otp") {
+            otpInputRefs.current[0]?.focus();
+        }
+    }, [step]);
 
     // Initialize reCAPTCHA using container from public/index.html
     useEffect(() => {
@@ -52,12 +75,22 @@ const Auth = () => {
         }
     }, []);
 
-    // Handle sending OTP; prepend "+1" automatically
+    // Handle phone input change and format as (123) 456-7890
+    const handlePhoneChange = (e) => {
+        const input = e.target.value;
+        // Remove non-digit characters
+        const digits = input.replace(/\D/g, "");
+        const formatted = formatPhoneNumber(digits);
+        setPhone(formatted);
+    };
+
+    // Handle sending OTP; remove formatting and prepend "+1"
     const handleSendOtp = () => {
         setPhoneLoading(true);
         const appVerifier = window.recaptchaVerifier;
-        // Prepend +1 if not already included
-        const fullPhoneNumber = phone.startsWith("+") ? phone : "+1" + phone;
+        // Remove non-digit characters from phone number
+        const digits = phone.replace(/\D/g, "");
+        const fullPhoneNumber = "+1" + digits;
         signInWithPhoneNumber(auth, fullPhoneNumber, appVerifier)
             .then((result) => {
                 setConfirmationResult(result);
@@ -82,7 +115,7 @@ const Auth = () => {
             const newOtp = [...otp];
             newOtp[index] = value.slice(-1); // Only keep the last digit entered
             setOtp(newOtp);
-            // If a digit was entered, focus the next input
+            // Focus next input if a digit is entered
             if (value && index < OTP_LENGTH - 1) {
                 otpInputRefs.current[index + 1]?.focus();
             }
@@ -93,7 +126,7 @@ const Auth = () => {
         }
     };
 
-    // Handle backspace to move to the previous input if needed
+    // Handle backspace: if current input is empty, move focus back and clear previous digit
     const handleOtpKeyDown = (e, index) => {
         if (e.key === "Backspace" && otp[index] === "" && index > 0) {
             const newOtp = [...otp];
@@ -168,10 +201,10 @@ const Auth = () => {
                 style={{
                     maxWidth: "400px",
                     width: "100%",
-                    padding: "1rem",
+                    padding: "1.5rem",
                     background: "#fff",
-                    borderRadius: "8px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                    border: "1px solid #eaeaea",
+                    borderRadius: "6px",
                 }}
             >
                 <Title level={3} style={{ textAlign: "center" }}>
@@ -186,7 +219,7 @@ const Auth = () => {
                                 addonBefore="+1"
                                 placeholder="Enter your mobile number"
                                 value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
+                                onChange={handlePhoneChange}
                             />
                         </Form.Item>
                         <Form.Item>
